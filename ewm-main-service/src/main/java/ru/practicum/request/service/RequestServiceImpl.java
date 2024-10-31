@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
@@ -27,6 +28,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestServiceImpl implements RequestService {
 
@@ -36,6 +38,7 @@ public class RequestServiceImpl implements RequestService {
 
     EventRepository eventRepository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<RequestDto> findAll(final Long userId) {
         log.info("Запрос на получение всех заявок участия пользователя с id {}", userId);

@@ -37,11 +37,11 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(
-                                                  @RequestParam(required = false) final List<Long> userIds,
+                                                  @RequestParam(required = false) final List<Long> ids,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero final int from,
                                                   @RequestParam(defaultValue = "10") @Positive final int size) {
         final int page = from / size;
-        return ResponseEntity.ok(userService.findAll(userIds, PageRequest.of(page, size)));
+        return ResponseEntity.ok(userService.findAll(ids, PageRequest.of(page, size)));
     }
 
     @PostMapping

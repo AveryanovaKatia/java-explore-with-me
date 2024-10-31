@@ -55,8 +55,8 @@ public class PublicEventController {
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventResponseLongDto> getByIdPublic(@PathVariable final Long eventId,
+    public ResponseEntity<EventResponseLongDto> findByIdPublic(@PathVariable final Long eventId,
                                                               final HttpServletRequest request) {
-        return ResponseEntity.ok(eventService.getByIdPublic(eventId, request));
+        return ResponseEntity.ok(eventService.findByIdPublic(eventId, request));
     }
 }

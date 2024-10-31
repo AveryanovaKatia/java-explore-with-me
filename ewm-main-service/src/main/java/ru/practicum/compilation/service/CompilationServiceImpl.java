@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationRequestDto;
 import ru.practicum.compilation.dto.CompilationResponceDto;
 import ru.practicum.compilation.dto.CompilationUpdateDto;
@@ -24,6 +25,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CompilationServiceImpl implements CompilationService {
 
@@ -82,6 +84,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     //////////------------Public------------//////////
 
+    @Transactional(readOnly = true)
     @Override
     public List<CompilationResponceDto> getAll(final Boolean pinned,
                                                final Pageable pageable) {
@@ -102,6 +105,7 @@ public class CompilationServiceImpl implements CompilationService {
                         .map(EventMapper::toEventResponseShortDto).toList())).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CompilationResponceDto getById(final Long compId) {
         log.info("Запрос на получение данных подборки с id = {}", compId);

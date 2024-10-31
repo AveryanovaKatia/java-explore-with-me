@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.QCategory;
 import ru.practicum.category.repository.CategoryRepository;
@@ -18,6 +19,7 @@ import ru.practicum.event.dto.EventRequestDto;
 import ru.practicum.event.dto.EventResponseLongDto;
 import ru.practicum.event.dto.EventResponseShortDto;
 import ru.practicum.event.dto.EventUpdateDto;
+import ru.practicum.event.dto.EventUpdateUserDto;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventSort;
@@ -49,6 +51,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventServiceImpl implements EventService {
 
@@ -66,6 +69,7 @@ public class EventServiceImpl implements EventService {
 
     //////////------------Private------------//////////
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventResponseShortDto> findAll(final Long userId,
                                                final Pageable pageable) {
@@ -97,6 +101,7 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventResponseLongDto(event);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventResponseLongDto findById(final Long userId,
                                          final Long eventId) {
@@ -113,7 +118,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventResponseLongDto update(final Long userId,
                                        final Long eventId,
-                                       final EventUpdateDto eventUpdateDto) {
+                                       final EventUpdateUserDto eventUpdateUserDto) {
         log.info("Запрос на обновление события с id = {}", eventId);
         final User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователя с id = {} нет." + userId));
@@ -125,54 +130,55 @@ public class EventServiceImpl implements EventService {
         if (oldEvent.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Нельзя изменить опубликованное событие, или переданный статут несуществует");
         }
-        if (Objects.nonNull(eventUpdateDto.getEventDate()) &&
-                eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("Событие не может начинаться ранее чем через 2 часа после обновления");
+        if (Objects.nonNull(eventUpdateUserDto.getEventDate()) &&
+                eventUpdateUserDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ValidationException("Событие не может начинаться ранее чем через 2 часа после обновления");
         }
 
-        if (Objects.nonNull(eventUpdateDto.getAnnotation())) {
-            oldEvent.setAnnotation(eventUpdateDto.getAnnotation());
+        if (Objects.nonNull(eventUpdateUserDto.getAnnotation())) {
+            oldEvent.setAnnotation(eventUpdateUserDto.getAnnotation());
         }
-        if (Objects.nonNull(eventUpdateDto.getCategory())) {
-            final Category category = categoryRepository.findById(eventUpdateDto.getCategory())
+        if (Objects.nonNull(eventUpdateUserDto.getCategory())) {
+            final Category category = categoryRepository.findById(eventUpdateUserDto.getCategory())
                     .orElseThrow(() -> new ValidationException("Категория указана неверно"));
             oldEvent.setCategory(category);
         }
-        if (Objects.nonNull(eventUpdateDto.getDescription())) {
-            oldEvent.setDescription(eventUpdateDto.getDescription());
+        if (Objects.nonNull(eventUpdateUserDto.getDescription())) {
+            oldEvent.setDescription(eventUpdateUserDto.getDescription());
         }
-        if (Objects.nonNull(eventUpdateDto.getEventDate())) {
-            oldEvent.setEventDate(eventUpdateDto.getEventDate());
+        if (Objects.nonNull(eventUpdateUserDto.getEventDate())) {
+            oldEvent.setEventDate(eventUpdateUserDto.getEventDate());
         }
-        if (Objects.nonNull(eventUpdateDto.getLocation())) {
-            oldEvent.setLon(eventUpdateDto.getLocation().lon());
-            oldEvent.setLat(eventUpdateDto.getLocation().lat());
+        if (Objects.nonNull(eventUpdateUserDto.getLocation())) {
+            oldEvent.setLon(eventUpdateUserDto.getLocation().lon());
+            oldEvent.setLat(eventUpdateUserDto.getLocation().lat());
         }
-        if (Objects.nonNull(eventUpdateDto.getPaid())) {
-            oldEvent.setPaid(eventUpdateDto.getPaid());
+        if (Objects.nonNull(eventUpdateUserDto.getPaid())) {
+            oldEvent.setPaid(eventUpdateUserDto.getPaid());
         }
-        if (Objects.nonNull(eventUpdateDto.getParticipantLimit())) {
-            oldEvent.setParticipantLimit(eventUpdateDto.getParticipantLimit());
+        if (Objects.nonNull(eventUpdateUserDto.getParticipantLimit())) {
+            oldEvent.setParticipantLimit(eventUpdateUserDto.getParticipantLimit());
         }
-        if (Objects.nonNull(eventUpdateDto.getRequestModeration())) {
-            oldEvent.setRequestModeration(eventUpdateDto.getRequestModeration());
+        if (Objects.nonNull(eventUpdateUserDto.getRequestModeration())) {
+            oldEvent.setRequestModeration(eventUpdateUserDto.getRequestModeration());
         }
-        if (Objects.nonNull(eventUpdateDto.getStateAction()) &&
-                eventUpdateDto.getStateAction().equals(StateAction.SEND_TO_REVIEW)) {
+        if (Objects.nonNull(eventUpdateUserDto.getStateAction()) &&
+                eventUpdateUserDto.getStateAction().equals(StateAction.SEND_TO_REVIEW)) {
                oldEvent.setState(EventState.PENDING);
         }
-        if (Objects.nonNull(eventUpdateDto.getStateAction()) &&
-                eventUpdateDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
+        if (Objects.nonNull(eventUpdateUserDto.getStateAction()) &&
+                eventUpdateUserDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
             oldEvent.setState(EventState.CANCELED);
         }
-        if (Objects.nonNull(eventUpdateDto.getTitle())) {
-            oldEvent.setTitle(eventUpdateDto.getTitle());
+        if (Objects.nonNull(eventUpdateUserDto.getTitle())) {
+            oldEvent.setTitle(eventUpdateUserDto.getTitle());
         }
         final Event event = eventRepository.save(oldEvent);
         log.info("Событие успешно обновлено под id {} и дожидается подтверждения", eventId);
         return EventMapper.toEventResponseLongDto(event);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<RequestDto> findRequestsByEventId(final Long userId,
                                                   final Long eventId) {
@@ -267,6 +273,7 @@ public class EventServiceImpl implements EventService {
 
     //////////------------Admin------------//////////
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventResponseLongDto> findOnParameters(final List<Long> usersId,
                                                        final List<String> states,
@@ -398,6 +405,7 @@ public class EventServiceImpl implements EventService {
 
     //////////------------Public------------//////////
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventResponseShortDto> findAllPublic(final String text,
                                                      final List<Long> categories,
@@ -461,8 +469,9 @@ public class EventServiceImpl implements EventService {
                 }).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public EventResponseLongDto getByIdPublic(final Long eventId,
+    public EventResponseLongDto findByIdPublic(final Long eventId,
                                               final HttpServletRequest request) {
         log.info("Запрос на получение опубликованого события с id {}", eventId);
         final Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)

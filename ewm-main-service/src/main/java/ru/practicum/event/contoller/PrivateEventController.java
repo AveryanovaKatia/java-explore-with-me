@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventRequestDto;
 import ru.practicum.event.dto.EventResponseLongDto;
 import ru.practicum.event.dto.EventResponseShortDto;
-import ru.practicum.event.dto.EventUpdateDto;
+import ru.practicum.event.dto.EventUpdateUserDto;
 import ru.practicum.event.service.EventService;
 import ru.practicum.request.dto.RequestDto;
 import ru.practicum.request.dto.RequestUpdateDto;
@@ -69,8 +69,8 @@ public class PrivateEventController {
     public ResponseEntity<EventResponseLongDto> update(
                                                @PathVariable @Positive final Long userId,
                                                @PathVariable @Positive final Long eventId,
-                                               @RequestBody @Valid final EventUpdateDto eventUpdateDto) {
-        return ResponseEntity.ok(eventService.update(userId, eventId, eventUpdateDto));
+                                               @RequestBody @Valid final EventUpdateUserDto eventUpdateUserDto) {
+        return ResponseEntity.ok(eventService.update(userId, eventId, eventUpdateUserDto));
     }
 
     //////////------------Requests------------//////////

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.UserRequestDto;
@@ -21,11 +22,13 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserResponseDto> findAll(final List<Long> userIds,
                                          final Pageable pageable) {
@@ -58,7 +61,7 @@ public class UserServiceImpl implements UserService {
         log.info("Запрос на удаление пользователя с id {}", userId);
         final User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователя с id = {} нет." + userId));
-        userRepository.delete(user);
+        userRepository.deleteById(userId);
         log.info("Пользователь с id {} успешно удален ", userId);
     }
 }

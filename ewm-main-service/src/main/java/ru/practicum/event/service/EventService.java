@@ -7,6 +7,7 @@ import ru.practicum.event.dto.EventRequestDto;
 import ru.practicum.event.dto.EventResponseLongDto;
 import ru.practicum.event.dto.EventResponseShortDto;
 import ru.practicum.event.dto.EventUpdateDto;
+import ru.practicum.event.dto.EventUpdateUserDto;
 import ru.practicum.event.model.EventSort;
 import ru.practicum.request.dto.RequestDto;
 import ru.practicum.request.dto.RequestUpdateDto;
@@ -30,7 +31,7 @@ public interface EventService {
 
     EventResponseLongDto update(final Long userId,
                                 final Long eventId,
-                                final EventUpdateDto eventUpdateDto);
+                                final EventUpdateUserDto eventUpdateUserDto);
 
     List<RequestDto> findRequestsByEventId(final Long userId,
                                           final Long eventId);
@@ -64,6 +65,6 @@ public interface EventService {
                                               final HttpServletRequest request,
                                               final int from);
 
-    EventResponseLongDto getByIdPublic(final Long eventId,
+    EventResponseLongDto findByIdPublic(final Long eventId,
                                        final HttpServletRequest request);
 }
