@@ -40,4 +40,3 @@ public class StatServiceController {
         return new ResponseEntity<>(statService.readStat(start, end, uris, unique), HttpStatus.OK);
     }
 }
-
