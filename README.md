@@ -87,3 +87,12 @@
 - GET /comments/{commentId} - Получение комментария по его id.
 
 
+## ER диаграмма
+
+![diagram.svg](diagram.svg)
+
+![diagram1.svg](diagram1.svg)
+
+## Дамп БД
+- [schema.sql](ewm-main-service/src/main/resources/schema.sql)
+- [schema.sql](ewm-stats-service/stats-server/src/main/resources/schema.sql)
